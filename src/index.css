@@ -74,6 +74,9 @@ p {
   display: none; 
 }
 
+/* Tab colors */
+
+
 /* Individual tab styling */
 .screenshot-tab {
   background-color: #2d2d2d;
@@ -89,9 +92,9 @@ p {
   box-sizing: border-box;
 }
 
-.screenshot-tab:hover {
+/* .screenshot-tab:hover {
   background-color: #3c3c3c;
-}
+} */
 
 /* Close (red X) button on each tab */
 .close-btn {
@@ -124,14 +127,15 @@ p {
 }
 
 #welcome-message {
-  display: none;
-  /* display: flex; */
+  /* display: none; */
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
 #screenshot {
+  display: none;
   height: 80%;
 }
 

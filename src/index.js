@@ -105,6 +105,7 @@ ipcMain.handle('capture-window', async () => {
   const display = screen.getDisplayMatching(windowBounds);
 
   try {
+    // Hide the window before taking a screenshot
     mainWindow.hide();
 
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -128,7 +129,10 @@ ipcMain.handle('capture-window', async () => {
 
     mainWindow.show();
     
-    return screenshotPath;
+    return {
+      name: path.parse(screenshotPath).name,
+      path: screenshotPath,
+    };
   } catch (error) {
     console.error('Error capturing screenshot:', error);
     throw error;
