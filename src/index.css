@@ -38,7 +38,7 @@ p {
 }
 
 /* Plus button styling */
-#screenshot-btn {
+#screenshot-btn-whole {
   background-color: #0e639c;
   color: #fff;
   width: 40px;
@@ -51,7 +51,7 @@ p {
   user-select: none;
 }
 
-#screenshot-btn:hover {
+#screenshot-btn-whole:hover {
   background-color: #1177bb;
 }
 
@@ -121,5 +121,18 @@ p {
   box-sizing: border-box;
   background: linear-gradient(#1e1e1e, #2c2c2c); /* Subtle dark gradient */
   color: #fff; /* White text for contrast */
+}
+
+#welcome-message {
+  display: none;
+  /* display: flex; */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#screenshot {
+  width: 90%;
+  height: 90%;
 }
 
