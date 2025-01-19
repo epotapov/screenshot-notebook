@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -7,8 +7,28 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+// Main window
+let mainWindow;
 
-let mainWindow
+// Create screenshot directory
+let capturePath;
+
+const getScreenshots = (directory) => {
+  try {
+    const files = fs.readdirSync(directory);
+
+    const pngList = files
+      .filter((file) => path.extname(file).toLowerCase() === '.png')
+      .map((file) => ({
+        name: path.parse(file).name,
+        path: path.join(directory, file),
+      }));
+    return pngList;
+  } catch (error) {
+    console.error('Error reading directory:', error);
+    return [];
+  }
+}
 
 const createWindow = () => {
   // Create the browser window.
@@ -30,6 +50,21 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  // Minimum window size
+  mainWindow.setMinimumSize(470, 350);
+
+  // Open the app and get all the pngs into a list
+  capturePath = path.join(app.getPath('pictures'), 'screenshot-notebook');
+
+  if (!fs.existsSync(capturePath)) {
+    fs.mkdirSync(capturePath);
+  }
+
+  const screenshotPaths = getScreenshots(capturePath);
+  mainWindow.webContents.once('did-finish-load', () => {
+    mainWindow.webContents.send('files-list', screenshotPaths);
+  });
 };
 
 // This method will be called when Electron has finished
@@ -58,16 +93,41 @@ app.on('activate', () => {
 // code. You can also put them in separate files and import them here.
 
 ipcMain.handle('capture-window', async () => {
-  const capturePath = path.join(app.getPath('pictures'), 'screenshot-notebook');
-  if (!fs.existsSync(capturePath)) {
-    fs.mkdirSync(capturePath);
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (!focusedWindow) {
+    throw new Error('No focused window available.');
   }
 
-  const screenshotPath = path.join(capturePath, `screenshot-${Date.now()}.png`);
+  // Get the bounds of the current window
+  const windowBounds = focusedWindow.getBounds();
+
+  // Get the screen that the window is on
+  const display = screen.getDisplayMatching(windowBounds);
 
   try {
-    const image = await mainWindow.webContents.capturePage();
-    fs.writeFileSync(screenshotPath, image.toPNG());
+    mainWindow.hide();
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const screenshotPath = path.join(capturePath, `screenshot-${Date.now()}.png`);
+
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+    });
+
+
+    // Find the source matching the display ID
+    const source = sources.find((source) => source.display_id === display.id.toString());
+    if (!source) {
+      throw new Error('Could not find screen source for the app window.');
+    }
+
+    const image = Buffer.from(source.thumbnail.toPNG());
+    fs.writeFileSync(screenshotPath, image);
+
+    mainWindow.show();
+    
     return screenshotPath;
   } catch (error) {
     console.error('Error capturing screenshot:', error);
