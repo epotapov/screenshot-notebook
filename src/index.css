@@ -35,6 +35,7 @@ p {
   justify-content: flex-start;
   align-items: center;
   padding: 10px;
+  gap: 10px;
 }
 
 /* Plus button styling */
@@ -53,6 +54,24 @@ p {
 
 #screenshot-btn-whole:hover {
   background-color: #1177bb;
+}
+
+/* Plus button styling */
+#screenshot-btn-whole-copy {
+  background-color: #ff9500;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  border-radius: 5px;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  user-select: none;
+}
+
+#screenshot-btn-whole-copy:hover {
+  background-color: #ffb143;
 }
 
 /* Scrollable container for tabs */
@@ -137,5 +156,46 @@ p {
 #screenshot {
   display: none;
   height: 80%;
+}
+
+/* Toast notification */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+#copy-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #2d8659;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+#copy-toast.show {
+  animation: fadeInOut 1.5s ease-in-out forwards;
 }
 

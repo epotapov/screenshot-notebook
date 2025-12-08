@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -136,5 +136,55 @@ ipcMain.handle('capture-window', async () => {
   } catch (error) {
     console.error('Error capturing screenshot:', error);
     throw error;
+  }
+});
+
+ipcMain.handle('delete-screenshot', async (event, file) => {
+  try {
+    if (!file) {
+      throw new Error('No file path provided');
+    }
+
+    // Ensure the file is inside our capture directory to avoid deleting arbitrary files
+    const normalizedCapture = path.normalize(capturePath + path.sep);
+    const normalizedFile = path.normalize(file);
+
+    if (!normalizedFile.startsWith(normalizedCapture)) {
+      throw new Error('Refusing to delete file outside capture directory');
+    }
+
+    await fs.promises.unlink(file);
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting screenshot:', error);
+    return false;
+  }
+});
+
+ipcMain.handle('copy-screenshot', async (event, file) => {
+  try {
+    if (!file) {
+      throw new Error('No file path provided');
+    }
+
+    // Ensure the file is inside our capture directory to avoid copying arbitrary files
+    const normalizedCapture = path.normalize(capturePath + path.sep);
+    const normalizedFile = path.normalize(file);
+
+    if (!normalizedFile.startsWith(normalizedCapture)) {
+      throw new Error('Refusing to copy file outside capture directory');
+    }
+
+    const img = nativeImage.createFromPath(file);
+    if (img.isEmpty && img.isEmpty()) {
+      throw new Error('Failed to load image for clipboard');
+    }
+
+    clipboard.writeImage(img);
+    return true;
+  } catch (error) {
+    console.error('Error copying image to clipboard:', error);
+    return false;
   }
 });

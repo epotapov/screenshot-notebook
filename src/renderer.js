@@ -1,11 +1,20 @@
 const tabBar = document.getElementById('tab-bar');
 const wholeButton = document.getElementById('screenshot-btn-whole');
+const copyButton = document.getElementById('screenshot-btn-whole-copy');
 const welcomeMessage = document.getElementById('welcome-message');
 const image = document.getElementById('screenshot');
+const copyToast = document.getElementById('copy-toast');
 
 const selectedTab = '#0e639c'; 
 
 let filesList;
+
+const showCopyToast = () => {
+  copyToast.classList.remove('show');
+
+  void copyToast.offsetWidth;
+  copyToast.classList.add('show');
+};
 
 tabBar.addEventListener('wheel', (event) => {
     event.preventDefault();
@@ -46,6 +55,50 @@ wholeButton.addEventListener('click', async () => {
     }
 });
 
+copyButton.addEventListener('click', async (event) => {
+    event.preventDefault();
+    if (!image.src) {
+        return;
+    }
+
+    try {
+        // Convert file:// URL to path
+        const filePath = (new URL(image.src)).pathname;
+        const ok = await window.electronAPI.copyScreenshot(filePath);
+        if (ok) {
+            console.log('Image copied to clipboard');
+            showCopyToast();
+        } else {
+            console.error('Failed to copy image');
+        }
+    } catch (err) {
+        console.error('Error copying image:', err);
+    }
+});
+
+document.addEventListener('keydown', async (e) => {
+    const isCopy = (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C');
+    if (!isCopy) {
+        return;
+    }
+
+    // Only act if image is visible
+    if (image.style.display === 'none' || !image.src) {
+        return;
+    }
+
+    try {
+        const filePath = (new URL(image.src)).pathname;
+        const ok = await window.electronAPI.copyScreenshot(filePath);
+        if (ok) {
+            console.log('Image copied to clipboard via keyboard');
+            showCopyToast();
+        }
+    } catch (err) {
+        console.error('Error copying image via keyboard:', err);
+    }
+});
+
 // Define hover functions to reuse
 
 const addTab = (name) => {
@@ -65,9 +118,30 @@ const addTab = (name) => {
     closeButton.innerText = 'x';
 
     // the button listener
-    closeButton.addEventListener('click', (event) => {
+    closeButton.addEventListener('click', async (event) => {
         event.stopPropagation();
-        console.log(`closing tab ${name}!`);
+        const file = filesList[name];
+        if (!file) {
+            return;
+        }
+
+        const result = await window.electronAPI.deleteScreenshot(file.path);
+        if (result) {
+            delete filesList[name];
+
+            if (tab.parentNode) {
+                tab.parentNode.removeChild(tab);
+            }
+
+            // If the removed file was currently displayed, hide image and show welcome
+            if (image.src && image.src.endsWith(file.path)) {
+                image.src = '';
+                image.style.display = 'none';
+                welcomeMessage.style.display = 'flex';
+            }
+        } else {
+            console.error('Failed to delete file ', result);
+        }
     });
 
     // tab listener
