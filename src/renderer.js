@@ -11,15 +11,13 @@ let filesList;
 
 const showCopyToast = () => {
   copyToast.classList.remove('show');
-
   void copyToast.offsetWidth;
   copyToast.classList.add('show');
 };
 
 tabBar.addEventListener('wheel', (event) => {
     event.preventDefault();
-    const scrollSpeed = 5; 
-
+    const scrollSpeed = 7;
     tabBar.scrollBy({
         left: event.deltaY * scrollSpeed,
         behavior: 'smooth'
