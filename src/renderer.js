@@ -53,26 +53,6 @@ wholeButton.addEventListener('click', async () => {
     }
 });
 
-copyButton.addEventListener('click', async (event) => {
-    event.preventDefault();
-    if (!image.src) {
-        return;
-    }
-
-    try {
-        // Convert file:// URL to path
-        const filePath = (new URL(image.src)).pathname;
-        const ok = await window.electronAPI.copyScreenshot(filePath);
-        if (ok) {
-            console.log('Image copied to clipboard');
-            showCopyToast();
-        } else {
-            console.error('Failed to copy image');
-        }
-    } catch (err) {
-        console.error('Error copying image:', err);
-    }
-});
 
 document.addEventListener('keydown', async (e) => {
     const isCopy = (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C');
@@ -131,8 +111,7 @@ const addTab = (name) => {
                 tab.parentNode.removeChild(tab);
             }
 
-            // If the removed file was currently displayed, hide image and show welcome
-            if (image.src && image.src.endsWith(file.path)) {
+            if (image.src.split(/[/\\]/).pop() === file.path.split(/[/\\]/).pop()) {
                 image.src = '';
                 image.style.display = 'none';
                 welcomeMessage.style.display = 'flex';
@@ -160,6 +139,26 @@ const addTab = (name) => {
 
         welcomeMessage.style.display = 'none';
         image.style.display = 'flex';
+    });
+
+    copyButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const file = filesList[name];
+        if (!file) {
+            return;
+        }
+
+        try {
+            const ok = await window.electronAPI.copyScreenshot(file.path);
+            if (ok) {
+                console.log('Image copied to clipboard');
+                showCopyToast();
+            } else {
+                console.error('Failed to copy image');
+            }
+        } catch (err) {
+            console.error('Error copying image:', err);
+        }
     });
 
     // add the components to the page
