@@ -8,6 +8,7 @@ const copyToast = document.getElementById('copy-toast');
 const selectedTab = '#0e639c'; 
 
 let filesList;
+let fileName = '';
 
 const showCopyToast = () => {
   copyToast.classList.remove('show');
@@ -50,30 +51,6 @@ wholeButton.addEventListener('click', async () => {
     }
     catch (error) {
         console.error(error);
-    }
-});
-
-
-document.addEventListener('keydown', async (e) => {
-    const isCopy = (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C');
-    if (!isCopy) {
-        return;
-    }
-
-    // Only act if image is visible
-    if (image.style.display === 'none' || !image.src) {
-        return;
-    }
-
-    try {
-        const filePath = (new URL(image.src)).pathname;
-        const ok = await window.electronAPI.copyScreenshot(filePath);
-        if (ok) {
-            console.log('Image copied to clipboard via keyboard');
-            showCopyToast();
-        }
-    } catch (err) {
-        console.error('Error copying image via keyboard:', err);
     }
 });
 
@@ -139,34 +116,58 @@ const addTab = (name) => {
 
         welcomeMessage.style.display = 'none';
         image.style.display = 'flex';
-    });
-
-    copyButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        const file = filesList[name];
-        if (!file) {
-            return;
-        }
-
-        try {
-            const ok = await window.electronAPI.copyScreenshot(file.path);
-            if (ok) {
-                console.log('Image copied to clipboard');
-                showCopyToast();
-            } else {
-                console.error('Failed to copy image');
-            }
-        } catch (err) {
-            console.error('Error copying image:', err);
-        }
+        fileName = name;
     });
 
     // add the components to the page
     tab.appendChild(span);
     tab.appendChild(closeButton);
     tabBar.appendChild(tab);
+    fileName = name;
     return tab;
 }
+
+copyButton.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const file = filesList[fileName];
+    if (!file) {
+        return;
+    }
+
+    try {
+        const ok = await window.electronAPI.copyScreenshot(file.path);
+        if (ok) {
+            console.log('Image copied to clipboard');
+            showCopyToast();
+        } else {
+            console.error('Failed to copy image');
+        }
+    } catch (err) {
+        console.error('Error copying image:', err);
+    }
+});
+
+document.addEventListener('keydown', async (e) => {
+    const isCopy = (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C');
+    if (!isCopy) {
+        return;
+    }
+
+    const file = filesList[fileName];
+    if (!file) {
+        return;
+    }
+
+    try {
+        const ok = await window.electronAPI.copyScreenshot(file.path);
+        if (ok) {
+            console.log('Image copied to clipboard via keyboard');
+            showCopyToast();
+        }
+    } catch (err) {
+        console.error('Error copying image via keyboard:', err);
+    }
+});
 
 window.electronAPI.filesList((files) => {
     filesList = files.reduce((dict, file) => {
