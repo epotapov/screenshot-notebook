@@ -152,34 +152,64 @@ ipcMain.handle('capture-snip', async () => {
   // Get the screen that the window is on
   const display = screen.getDisplayMatching(windowBounds);
 
+  console.log(windowBounds)
+  console.log(display)
+
   try {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
-
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+    let overlay = new BrowserWindow({
+      x: 0,
+      y: 0,
+      width: display.bounds.width,
+      height: display.bounds.height,
+      frame: false,
+      transparent: true,
+      resizable: false,
+      movable: false,
+      fullscreen: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      hasShadow: false,
+      focusable: false,
+      webPreferences: {
+        contextIsolation: true,
+        nodeIntegration: false
+      }
     });
 
-    // Find the source matching the display ID
-    const source = sources.find((source) => source.display_id === display.id.toString());
-    if (!source) {
-      throw new Error('Could not find screen source for the app window.');
-    }
+    overlay.setAlwaysOnTop(true, 'screen-saver');
 
-    const image = Buffer.from(source.thumbnail.toPNG());
-    fs.writeFileSync(screenshotPath, image);
+    overlay.setIgnoreMouseEvents(true);
 
-    mainWindow.show();
+    overlay.loadFile(path.join(__dirname, 'overlay.html'));
+
+
+    // await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
+
+    // const sources = await desktopCapturer.getSources({
+    //   types: ['screen'],
+    //   thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+    // });
+
+    // // Find the source matching the display ID
+    // const source = sources.find((source) => source.display_id === display.id.toString());
+    // if (!source) {
+    //   throw new Error('Could not find screen source for the app window.');
+    // }
+
+    // const image = Buffer.from(source.thumbnail.toPNG());
+    // fs.writeFileSync(screenshotPath, image);
+
+    // mainWindow.show();
     
-    return {
-      name: path.parse(screenshotPath).name,
-      path: screenshotPath,
-    };
+    // return {
+    //   name: path.parse(screenshotPath).name,
+    //   path: screenshotPath,
+    // };
   } catch (error) {
     console.error('Error capturing screenshot:', error);
     throw error;
