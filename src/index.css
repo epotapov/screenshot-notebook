@@ -56,8 +56,8 @@ p {
   background-color: #1177bb;
 }
 
-/* Plus button styling */
-#screenshot-btn-whole-copy {
+/* Copy button styling */
+#screenshot-btn-copy {
   background-color: #ff9500;
   color: #fff;
   width: 40px;
@@ -70,8 +70,26 @@ p {
   user-select: none;
 }
 
-#screenshot-btn-whole-copy:hover {
+#screenshot-btn-copy:hover {
   background-color: #ffb143;
+}
+
+/* Snippet button styling */
+#screenshot-btn-snip {
+  background-color: #16a085;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  border-radius: 5px;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  user-select: none;
+}
+
+#screenshot-btn-snip:hover {
+  background-color: #1abc9c;
 }
 
 /* Scrollable container for tabs */

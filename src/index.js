@@ -139,6 +139,53 @@ ipcMain.handle('capture-window', async () => {
   }
 });
 
+
+ipcMain.handle('capture-snip', async () => {
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (!focusedWindow) {
+    throw new Error('No focused window available.');
+  }
+
+  // Get the bounds of the current window
+  const windowBounds = focusedWindow.getBounds();
+
+  // Get the screen that the window is on
+  const display = screen.getDisplayMatching(windowBounds);
+
+  try {
+    // Hide the window before taking a screenshot
+    mainWindow.hide();
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
+
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+    });
+
+    // Find the source matching the display ID
+    const source = sources.find((source) => source.display_id === display.id.toString());
+    if (!source) {
+      throw new Error('Could not find screen source for the app window.');
+    }
+
+    const image = Buffer.from(source.thumbnail.toPNG());
+    fs.writeFileSync(screenshotPath, image);
+
+    mainWindow.show();
+    
+    return {
+      name: path.parse(screenshotPath).name,
+      path: screenshotPath,
+    };
+  } catch (error) {
+    console.error('Error capturing screenshot:', error);
+    throw error;
+  }
+});
+
 ipcMain.handle('delete-screenshot', async (event, file) => {
   try {
     if (!file) {

@@ -1,6 +1,7 @@
 const tabBar = document.getElementById('tab-bar');
 const wholeButton = document.getElementById('screenshot-btn-whole');
-const copyButton = document.getElementById('screenshot-btn-whole-copy');
+const snipButton = document.getElementById('screenshot-btn-snip');
+const copyButton = document.getElementById('screenshot-btn-copy');
 const welcomeMessage = document.getElementById('welcome-message');
 const image = document.getElementById('screenshot');
 const copyToast = document.getElementById('copy-toast');
@@ -29,6 +30,35 @@ wholeButton.addEventListener('click', async () => {
     console.log("making a screenshot")
     try {
         const capturePath = await window.electronAPI.captureWindow();
+        image.src = `file://${capturePath.path}`;
+        filesList[capturePath.name] = capturePath;
+        const tab = addTab(capturePath.name);
+        const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
+      
+        // Iterate through all tabs
+        tabs.forEach((t) => {
+            if (capturePath.name === t.id) {
+                image.src = filesList[t.id].path;
+            }
+
+            t.style.backgroundColor = '#2d2d2d';
+        });
+      
+        // Change the background color of the clicked tab
+        tab.style.backgroundColor = selectedTab;
+
+        welcomeMessage.style.display = 'none';
+        image.style.display = 'flex';
+    }
+    catch (error) {
+        console.error(error);
+    }
+});
+
+snipButton.addEventListener('click', async () => {
+    console.log("snipping a screenshot")
+    try {
+        const capturePath = await window.electronAPI.captureSnip();
         image.src = `file://${capturePath.path}`;
         filesList[capturePath.name] = capturePath;
         const tab = addTab(capturePath.name);
