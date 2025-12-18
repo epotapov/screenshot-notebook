@@ -4,11 +4,11 @@ An app to make screenshots and snippets.
 
 ## List of current features:
 
-1. Take screenshot of screen which adds to the list of screenshots made.
-2. The screenshots made in the session can be seen in each tab window.
-3. Can copy and save the screenshot made.
+1. full screenshot
+2. screenshot tabs
+3. copy button
+4. Snip screenshot
 
 ## Current list of features to be added:
 
-1. Buttons for both snipping screenshots and full screenshots of current screen.
-2. Snipping tool will have a press and drag functionality freezing the screen so user can select a portion of the screen to take screenshot of.
+1. Better viewer for screenshots
