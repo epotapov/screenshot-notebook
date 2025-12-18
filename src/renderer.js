@@ -58,26 +58,26 @@ wholeButton.addEventListener('click', async () => {
 snipButton.addEventListener('click', async () => {
     console.log("snipping a screenshot")
     try {
-        await window.electronAPI.captureSnip();
-        // image.src = `file://${capturePath.path}`;
-        // filesList[capturePath.name] = capturePath;
-        // const tab = addTab(capturePath.name);
-        // const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
+        const capturePath = await window.electronAPI.captureSnip();
+        image.src = `file://${capturePath.path}`;
+        filesList[capturePath.name] = capturePath;
+        const tab = addTab(capturePath.name);
+        const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
       
-        // // Iterate through all tabs
-        // tabs.forEach((t) => {
-        //     if (capturePath.name === t.id) {
-        //         image.src = filesList[t.id].path;
-        //     }
+        // Iterate through all tabs
+        tabs.forEach((t) => {
+            if (capturePath.name === t.id) {
+                image.src = filesList[t.id].path;
+            }
 
-        //     t.style.backgroundColor = '#2d2d2d';
-        // });
+            t.style.backgroundColor = '#2d2d2d';
+        });
       
-        // // Change the background color of the clicked tab
-        // tab.style.backgroundColor = selectedTab;
+        // Change the background color of the clicked tab
+        tab.style.backgroundColor = selectedTab;
 
-        // welcomeMessage.style.display = 'none';
-        // image.style.display = 'flex';
+        welcomeMessage.style.display = 'none';
+        image.style.display = 'flex';
     }
     catch (error) {
         console.error(error);

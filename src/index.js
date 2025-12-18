@@ -108,7 +108,7 @@ ipcMain.handle('capture-window', async () => {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
     const screenshotPath = path.join(capturePath, `screenshot-${Date.now()}.png`);
 
@@ -152,28 +152,49 @@ ipcMain.handle('capture-snip', async () => {
   // Get the screen that the window is on
   const display = screen.getDisplayMatching(windowBounds);
 
-  console.log(windowBounds)
-  console.log(display)
-
   try {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
+
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+    });
+
+    // Find the source matching the display ID
+    const source = sources.find((source) => source.display_id === display.id.toString());
+    if (!source) {
+      throw new Error('Could not find screen source for the app window.');
+    }
+
+    const image = Buffer.from(source.thumbnail.toPNG());
+    const nativeImg = nativeImage.createFromBuffer(image);
+
+    console.log(source.thumbnail.getSize())
+
+    const { x, y, width, height } = display.bounds;
+
     let overlay = new BrowserWindow({
-      x: 0,
-      y: 0,
-      width: display.bounds.width,
-      height: display.bounds.height,
+      x,
+      y,
+      width,
+      height,
       frame: false,
       transparent: true,
       resizable: false,
       movable: false,
-      fullscreen: true,
+      fullscreen: false,
       alwaysOnTop: true,
       skipTaskbar: true,
       hasShadow: false,
       focusable: false,
+      show: true,
       webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false
       }
@@ -181,35 +202,34 @@ ipcMain.handle('capture-snip', async () => {
 
     overlay.setAlwaysOnTop(true, 'screen-saver');
 
-    overlay.setIgnoreMouseEvents(true);
+    // overlay.on('blur', () => overlay.focus());
+
+    // overlay.setBackgroundColor('#00000000');
 
     overlay.loadFile(path.join(__dirname, 'overlay.html'));
 
+    // Open the DevTools.
+    overlay.webContents.openDevTools();
 
-    // await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
+    const selection = await new Promise((resolve) => {
+      ipcMain.once('capture-dimension', (event, dim) => resolve(dim));
+    });
 
-    // const sources = await desktopCapturer.getSources({
-    //   types: ['screen'],
-    //   thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
-    // });
+    overlay.close();
 
-    // // Find the source matching the display ID
-    // const source = sources.find((source) => source.display_id === display.id.toString());
-    // if (!source) {
-    //   throw new Error('Could not find screen source for the app window.');
-    // }
+    console.log(selection)
 
-    // const image = Buffer.from(source.thumbnail.toPNG());
-    // fs.writeFileSync(screenshotPath, image);
+    const snippet = nativeImg.crop(selection);
 
-    // mainWindow.show();
+    fs.writeFileSync(screenshotPath, snippet.toPNG());
+
+    mainWindow.show();
     
-    // return {
-    //   name: path.parse(screenshotPath).name,
-    //   path: screenshotPath,
-    // };
+    return {
+      name: path.parse(screenshotPath).name,
+      path: screenshotPath,
+    };
   } catch (error) {
     console.error('Error capturing screenshot:', error);
     throw error;
