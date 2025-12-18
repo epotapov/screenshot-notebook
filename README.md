@@ -12,3 +12,4 @@ An app to make screenshots and snippets.
 ## Current list of features to be added:
 
 1. Better viewer for screenshots
+2. Improve performance 

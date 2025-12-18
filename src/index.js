@@ -49,7 +49,7 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // Minimum window size
   mainWindow.setMinimumSize(470, 350);
@@ -108,7 +108,7 @@ ipcMain.handle('capture-window', async () => {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     const screenshotPath = path.join(capturePath, `screenshot-${Date.now()}.png`);
 
@@ -156,7 +156,7 @@ ipcMain.handle('capture-snip', async () => {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
 
@@ -209,7 +209,7 @@ ipcMain.handle('capture-snip', async () => {
     overlay.loadFile(path.join(__dirname, 'overlay.html'));
 
     // Open the DevTools.
-    overlay.webContents.openDevTools();
+    // overlay.webContents.openDevTools();
 
 
     const selection = await new Promise((resolve) => {
