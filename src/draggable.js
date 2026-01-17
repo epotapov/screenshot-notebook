@@ -23,6 +23,16 @@ canvas.addEventListener('mousedown', event => {
 
 canvas.addEventListener('mouseup', event => {
     if (drag) {
+        if (recWidth < 0) {
+            pointAx = pointAx + recWidth;
+            recWidth = Math.abs(recWidth);
+        }
+
+        if (recHeight < 0) {
+            pointAy = pointAy + recHeight;
+            recHeight = Math.abs(recHeight);
+        }
+
         const dimension = {
             x: pointAx,
             y: pointAy,
