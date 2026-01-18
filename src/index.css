@@ -13,6 +13,7 @@ h1 {
 
 p {
   user-select: none;
+  margin: 3px;
 }
 
 /* Fixed, dark navbar at top */
@@ -173,7 +174,9 @@ p {
 
 #screenshot {
   display: none;
-  height: 80%;
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
 }
 
 /* Toast notification */

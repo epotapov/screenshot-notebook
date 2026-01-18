@@ -203,10 +203,6 @@ ipcMain.handle('capture-snip', async () => {
 
     overlay.setAlwaysOnTop(true, 'screen-saver');
 
-    // overlay.on('blur', () => overlay.focus());
-
-    // overlay.setBackgroundColor('#00000000');
-
     overlay.loadFile(path.join(__dirname, 'overlay.html'));
 
     // Open the DevTools.

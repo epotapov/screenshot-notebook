@@ -112,16 +112,27 @@ const addTab = (name) => {
 
         const result = await window.electronAPI.deleteScreenshot(file.path);
         if (result) {
+            const fileNames = Object.keys(filesList);
+            const index = fileNames.indexOf(name);
+            
             delete filesList[name];
 
             if (tab.parentNode) {
                 tab.parentNode.removeChild(tab);
             }
 
-            if (image.src.split(/[/\\]/).pop() === file.path.split(/[/\\]/).pop()) {
-                image.src = '';
-                image.style.display = 'none';
-                welcomeMessage.style.display = 'flex';
+            if (fileName === name) {
+                if (index > 0) {
+                    const prev = fileNames[index - 1];
+                    const prevTab = document.getElementById(prev);
+                    if (prevTab) {
+                        prevTab.click();
+                    }
+                } else {
+                    image.src = '';
+                    image.style.display = 'none';
+                    welcomeMessage.style.display = 'flex';
+                }
             }
         } else {
             console.error('Failed to delete file ', result);
