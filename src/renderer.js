@@ -135,7 +135,7 @@ const addTab = (name) => {
                 }
             }
         } else {
-            console.error('Failed to delete file ', result);
+            console.error('Failed to delete file');
         }
     });
 

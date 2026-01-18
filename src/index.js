@@ -247,6 +247,10 @@ ipcMain.handle('delete-screenshot', async (event, file) => {
       throw new Error('Refusing to delete file outside capture directory');
     }
 
+    if (!fs.existsSync(file)) {
+      return true;
+    }
+
     await fs.promises.unlink(file);
 
     return true;
