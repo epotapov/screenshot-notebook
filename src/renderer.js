@@ -128,7 +128,15 @@ const addTab = (name) => {
                     if (prevTab) {
                         prevTab.click();
                     }
-                } else {
+                }
+                else if (index == 0 && fileNames.length > 1) {
+                    const next = fileNames[1];
+                    const nextTab = document.getElementById(next);
+                    if (nextTab) {
+                        nextTab.click();
+                    }
+                }
+                else {
                     image.src = '';
                     image.style.display = 'none';
                     welcomeMessage.style.display = 'flex';
@@ -217,8 +225,8 @@ window.electronAPI.filesList((files) => {
     }, {});
     console.log(filesList);
     files.forEach((file) => {
-        // console.log(file);
         addTab(file.name);
+        fileName = '';
     });
 });
 
