@@ -119,10 +119,15 @@ ipcMain.handle('capture-window', async () => {
     });
 
 
-    // Find the source matching the display ID
-    const source = sources.find((source) => source.display_id === display.id.toString());
-    if (!source) {
-      throw new Error('Could not find screen source for the app window.');
+    const allDisplays = screen.getAllDisplays();
+    const displayIndex = allDisplays.findIndex((d) => d.id === display.id);
+
+    let source;
+
+    if (displayIndex !== -1 && sources[displayIndex]) {
+      source = sources[displayIndex];
+    } else {
+      source = sources.find((s) => s.display_id === display.id.toString()) || sources[0];
     }
 
     const image = Buffer.from(source.thumbnail.toPNG());
@@ -166,8 +171,17 @@ ipcMain.handle('capture-snip', async () => {
       thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
     });
 
-    // Find the source matching the display ID
-    const source = sources.find((source) => source.display_id === display.id.toString());
+    const allDisplays = screen.getAllDisplays();
+    const displayIndex = allDisplays.findIndex((d) => d.id === display.id);
+
+    let source;
+
+    if (displayIndex !== -1 && sources[displayIndex]) {
+      source = sources[displayIndex];
+    } else {
+      source = sources.find((s) => s.display_id === display.id.toString());
+    }
+
     if (!source) {
       throw new Error('Could not find screen source for the app window.');
     }
