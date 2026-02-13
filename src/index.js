@@ -229,7 +229,6 @@ ipcMain.handle('capture-snip', async () => {
 
     overlay.close();
 
-    console.log(selection)
 
     const snippet = nativeImg.crop(selection);
 

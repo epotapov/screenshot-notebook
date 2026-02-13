@@ -1,8 +1,6 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-console.log('Draggable.js loaded, window.electronAPI:', window.electronAPI);
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -39,7 +37,6 @@ canvas.addEventListener('mouseup', event => {
             width: recWidth,
             height: recHeight
         }
-        console.log(dimension)
         window.electronAPI.sendDimension(dimension);
         finish = true;
         drag = false;

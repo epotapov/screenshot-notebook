@@ -35,7 +35,6 @@ wholeButton.addEventListener('click', async () => {
         const tab = addTab(capturePath.name);
         const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
       
-        // Iterate through all tabs
         tabs.forEach((t) => {
             if (capturePath.name === t.id) {
                 image.src = filesList[t.id].path;
@@ -44,7 +43,6 @@ wholeButton.addEventListener('click', async () => {
             t.style.backgroundColor = '#2d2d2d';
         });
       
-        // Change the background color of the clicked tab
         tab.style.backgroundColor = selectedTab;
 
         welcomeMessage.style.display = 'none';
@@ -64,7 +62,6 @@ snipButton.addEventListener('click', async () => {
         const tab = addTab(capturePath.name);
         const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
       
-        // Iterate through all tabs
         tabs.forEach((t) => {
             if (capturePath.name === t.id) {
                 image.src = filesList[t.id].path;
@@ -73,7 +70,6 @@ snipButton.addEventListener('click', async () => {
             t.style.backgroundColor = '#2d2d2d';
         });
       
-        // Change the background color of the clicked tab
         tab.style.backgroundColor = selectedTab;
 
         welcomeMessage.style.display = 'none';
@@ -84,25 +80,20 @@ snipButton.addEventListener('click', async () => {
     }
 });
 
-// Define hover functions to reuse
 
 const addTab = (name) => {
-    // Tab div
     const tab = document.createElement('div');
     tab.className = 'screenshot-tab';
 
     tab.id = name;
 
-    // Text in tab
     const span = document.createElement('span');
     span.innerText = name;
 
-    // Button in div
     const closeButton = document.createElement('button');
     closeButton.className = 'close-btn';
     closeButton.innerText = 'x';
 
-    // the button listener
     closeButton.addEventListener('click', async (event) => {
         event.stopPropagation();
         const file = filesList[name];
@@ -147,11 +138,9 @@ const addTab = (name) => {
         }
     });
 
-    // tab listener
     tab.addEventListener('click', () => {
         const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
       
-        // Iterate through all tabs
         tabs.forEach((t) => {
             if (tab.id === t.id) {
                 image.src = filesList[t.id].path;
@@ -160,7 +149,6 @@ const addTab = (name) => {
             t.style.backgroundColor = '#2d2d2d';
         });
       
-        // Change the background color of the clicked tab
         tab.style.backgroundColor = selectedTab;
 
         welcomeMessage.style.display = 'none';
@@ -168,10 +156,10 @@ const addTab = (name) => {
         fileName = name;
     });
 
-    // add the components to the page
     tab.appendChild(span);
     tab.appendChild(closeButton);
     tabBar.appendChild(tab);
+    tabBar.scrollLeft = tabBar.scrollWidth;
     fileName = name;
     return tab;
 }
@@ -220,7 +208,7 @@ document.addEventListener('keydown', async (e) => {
 
 window.electronAPI.filesList((files) => {
     filesList = files.reduce((dict, file) => {
-        dict[file.name] = file; // Use the 'id' as the key
+        dict[file.name] = file;
         return dict;
     }, {});
     console.log(filesList);
