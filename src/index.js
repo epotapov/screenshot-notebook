@@ -162,35 +162,6 @@ ipcMain.handle('capture-snip', async () => {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
-
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
-    });
-
-    const allDisplays = screen.getAllDisplays();
-    const displayIndex = allDisplays.findIndex((d) => d.id === display.id);
-
-    let source;
-
-    if (displayIndex !== -1 && sources[displayIndex]) {
-      source = sources[displayIndex];
-    } else {
-      source = sources.find((s) => s.display_id === display.id.toString());
-    }
-
-    if (!source) {
-      throw new Error('Could not find screen source for the app window.');
-    }
-
-    const image = Buffer.from(source.thumbnail.toPNG());
-    const nativeImg = nativeImage.createFromBuffer(image);
-
-    console.log(source.thumbnail.getSize())
-
     const { x, y, width, height } = display.bounds;
 
     let overlay = new BrowserWindow({
@@ -222,13 +193,41 @@ ipcMain.handle('capture-snip', async () => {
     // Open the DevTools.
     // overlay.webContents.openDevTools();
 
-
     const selection = await new Promise((resolve) => {
       ipcMain.once('capture-dimension', (event, dim) => resolve(dim));
     });
 
     overlay.close();
 
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
+    
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+    });
+
+    const allDisplays = screen.getAllDisplays();
+    const displayIndex = allDisplays.findIndex((d) => d.id === display.id);
+
+    let source;
+
+    if (displayIndex !== -1 && sources[displayIndex]) {
+      source = sources[displayIndex];
+    } else {
+      source = sources.find((s) => s.display_id === display.id.toString()) || sources[0];
+    }
+
+    if (!source) {
+      mainWindow.show();
+      throw new Error('Could not find screen source for the app window.');
+    }
+
+    console.log(source.thumbnail.getSize());
+
+    const image = Buffer.from(source.thumbnail.toPNG());
+    const nativeImg = nativeImage.createFromBuffer(image);
 
     const snippet = nativeImg.crop(selection);
 
