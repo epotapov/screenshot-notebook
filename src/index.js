@@ -201,6 +201,11 @@ ipcMain.handle('capture-snip', async () => {
 
     await new Promise((resolve) => setTimeout(resolve, 50));
 
+    if (!selection || selection.width <= 0 || selection.height <= 0) {
+      mainWindow.show();
+      return;
+    }
+
     const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
     
     const sources = await desktopCapturer.getSources({

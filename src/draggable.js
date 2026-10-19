@@ -8,19 +8,26 @@ let pointAx = 0;
 let pointAy = 0;
 let recWidth = 0;
 let recHeight = 0;
+let firstPress = false;
+let secondPress = false;
 let drag = false;
-let finish = false;
 
 canvas.addEventListener('mousedown', event => {
-    if (!finish) {
-        pointAx = event.clientX;
-        pointAy = event.clientY;
-        drag = true;
+    if (!drag) {
+        firstPress = true;
+    } else if (!firstPress) {
+        secondPress = true;
     }
 });
 
 canvas.addEventListener('mouseup', event => {
-    if (drag) {
+    if (firstPress) {
+        firstPress = false;
+        drag = true;
+
+        pointAx = event.clientX;
+        pointAy = event.clientY;
+    } else if (drag && secondPress) {
         if (recWidth < 0) {
             pointAx = pointAx + recWidth;
             recWidth = Math.abs(recWidth);
@@ -38,7 +45,6 @@ canvas.addEventListener('mouseup', event => {
             height: recHeight
         }
         window.electronAPI.sendDimension(dimension);
-        finish = true;
         drag = false;
     }
 });
