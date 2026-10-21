@@ -6,10 +6,12 @@ const welcomeMessage = document.getElementById('welcome-message');
 const image = document.getElementById('screenshot');
 const copyToast = document.getElementById('copy-toast');
 
-const selectedTab = '#0e639c'; 
+const selectedTab = '#0d61d4'; 
 
 let filesList;
 let fileName = '';
+let scrollTarget = 0;
+let scrolling = false;
 
 const showCopyToast = () => {
   copyToast.classList.remove('show');
@@ -17,13 +19,49 @@ const showCopyToast = () => {
   copyToast.classList.add('show');
 };
 
+const animateScroll = () => {
+    const distance = scrollTarget - tabBar.scrollLeft;
+    
+    if (Math.abs(distance) < 5) {
+        tabBar.scrollLeft = scrollTarget;
+        scrolling = false;
+        return;
+    }
+
+    tabBar.scrollLeft += distance * 0.2;
+    requestAnimationFrame(animateScroll);
+};
+
+const smoothScrollTo = (value) => {
+    const max = tabBar.scrollWidth - tabBar.clientWidth;
+    scrollTarget = Math.max(0, Math.min(value, max));
+    
+    if (!scrolling) {
+        scrolling = true;
+        requestAnimationFrame(animateScroll);
+    }
+};
+
 tabBar.addEventListener('wheel', (event) => {
     event.preventDefault();
-    const scrollSpeed = 7;
-    tabBar.scrollBy({
-        left: event.deltaY * scrollSpeed,
-        behavior: 'smooth'
-    });
+    
+    let start;
+    if (scrolling) {
+        start = scrollTarget;
+    }
+    else {
+        start = tabBar.scrollLeft;
+    }
+    
+    let delta;
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+        delta = event.deltaX;
+    }
+    else {
+        delta = event.deltaY;
+    }
+    
+    smoothScrollTo(start + delta * 2);
 });
 
 wholeButton.addEventListener('click', async () => {
@@ -40,7 +78,7 @@ wholeButton.addEventListener('click', async () => {
                 image.src = filesList[t.id].path;
             }
 
-            t.style.backgroundColor = '#2d2d2d';
+            t.style.backgroundColor = '#1f2229';
         });
       
         tab.style.backgroundColor = selectedTab;
@@ -67,7 +105,7 @@ snipButton.addEventListener('click', async () => {
                 image.src = filesList[t.id].path;
             }
 
-            t.style.backgroundColor = '#2d2d2d';
+            t.style.backgroundColor = '#1f2229';
         });
       
         tab.style.backgroundColor = selectedTab;
@@ -146,7 +184,7 @@ const addTab = (name) => {
                 image.src = filesList[t.id].path;
             }
 
-            t.style.backgroundColor = '#2d2d2d';
+            t.style.backgroundColor = '#1f2229';
         });
       
         tab.style.backgroundColor = selectedTab;
@@ -159,7 +197,7 @@ const addTab = (name) => {
     tab.appendChild(span);
     tab.appendChild(closeButton);
     tabBar.appendChild(tab);
-    tabBar.scrollLeft = tabBar.scrollWidth;
+    smoothScrollTo(tabBar.scrollWidth);
     fileName = name;
     return tab;
 }

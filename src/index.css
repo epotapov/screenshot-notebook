@@ -1,9 +1,28 @@
+/* Theme colors: change these to restyle the whole app */
+:root {
+  --bg: #0f1115;            /* App background */
+  --surface: #16181d;       /* Navbar */
+  --surface-raised: #1f2229; /* Tabs */
+  --border: #262a33;        /* Subtle separator lines */
+  --text: #e6e8ec;
+  --text-muted: #9aa0aa;
+  --accent: #0d61d4;        /* Logo blue: + button and selected tab */
+  --accent-hover: #1184e3;  /* Logo center blue */
+  --snip: #0d9488;          /* Teal */
+  --snip-hover: #14b8a6;
+  --copy: #d97706;          /* Amber */
+  --copy-hover: #f59e0b;
+  --danger: #f87171;        /* Close X */
+  --danger-hover: #fca5a5;
+  --success: #059669;       /* Copy toast */
+}
+
 /* Base reset + font */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   margin: 0;
-  background-color: #1e1e1e; /* Dark background (VS Code style) */
-  color: #cccccc;           /* Subtle contrast */
+  background-color: var(--bg);
+  color: var(--text-muted);
 }
 
 /* Rules for h1 and p */
@@ -25,8 +44,8 @@ p {
   flex-direction: row;
   align-items: center;
   width: 100%;
-  background-color: #252526;       /* Dark gray (VS Code style) */
-  border-bottom: 1px solid #333;   /* Subtle separator line */
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
   z-index: 10;
 }
 
@@ -41,56 +60,59 @@ p {
 
 /* Plus button styling */
 #screenshot-btn-whole {
-  background-color: #0e639c;
+  background-color: var(--accent);
   color: #fff;
   width: 40px;
   height: 40px;
   margin: 0;
-  border-radius: 5px;
+  border-radius: 8px;
   border: none;
   font-size: 1.2em;
   cursor: pointer;
   user-select: none;
+  transition: background-color 0.15s;
 }
 
 #screenshot-btn-whole:hover {
-  background-color: #1177bb;
+  background-color: var(--accent-hover);
 }
 
 /* Copy button styling */
 #screenshot-btn-copy {
-  background-color: #ff9500;
+  background-color: var(--copy);
   color: #fff;
   width: 40px;
   height: 40px;
   margin: 0;
-  border-radius: 5px;
+  border-radius: 8px;
   border: none;
   font-size: 1.2em;
   cursor: pointer;
   user-select: none;
+  transition: background-color 0.15s;
 }
 
 #screenshot-btn-copy:hover {
-  background-color: #ffb143;
+  background-color: var(--copy-hover);
 }
 
 /* Snippet button styling */
 #screenshot-btn-snip {
-  background-color: #16a085;
+  background-color: var(--snip);
   color: #fff;
   width: 40px;
   height: 40px;
   margin: 0;
-  border-radius: 5px;
+  border-radius: 8px;
   border: none;
   font-size: 1.2em;
   cursor: pointer;
   user-select: none;
+  transition: background-color 0.15s;
 }
 
 #screenshot-btn-snip:hover {
-  background-color: #1abc9c;
+  background-color: var(--snip-hover);
 }
 
 /* Scrollable container for tabs */
@@ -104,7 +126,6 @@ p {
   flex-wrap: nowrap;
   width: calc(100% - 80px);
   user-select: none;
-  scroll-behavior: smooth;
 }
 
 /* Hide scrollbar in Chrome, Safari, Opera */
@@ -117,34 +138,39 @@ p {
 
 /* Individual tab styling */
 .screenshot-tab {
-  background-color: #2d2d2d;
-  color: #ffffff;
+  background-color: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: background-color 0.15s, filter 0.15s;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-width: 140px;
   margin: 0 10px;
   padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   flex-shrink: 0;
   box-sizing: border-box;
 }
 
-/* .screenshot-tab:hover {
-  background-color: #3c3c3c;
-} */
+/* Brighten on hover. A filter is used because the JS sets the
+   tab's background color inline, which overrides a CSS hover color. */
+.screenshot-tab:hover {
+  filter: brightness(1.3);
+}
 
 /* Close (red X) button on each tab */
 .close-btn {
   background: none;
   border: none;
-  color: #ff5f56; /* Red color (like macOS close button) */
+  color: var(--danger);
   cursor: pointer;
   font-size: 1em;
   margin-left: 10px;
 }
 .close-btn:hover {
-  color: #ff7a75;
+  color: var(--danger-hover);
 }
 
 /* Viewer area (main content) */
@@ -160,8 +186,8 @@ p {
   justify-content: center;
   padding-top: 60px;  /* Make room for the fixed navbar */
   box-sizing: border-box;
-  background: linear-gradient(#1e1e1e, #2c2c2c); /* Subtle dark gradient */
-  color: #fff; /* White text for contrast */
+  background: radial-gradient(circle at top, #1a1d24, var(--bg) 70%); /* Soft glow from the top */
+  color: var(--text);
 }
 
 #welcome-message {
@@ -203,13 +229,13 @@ p {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: #2d8659;
+  background-color: var(--success);
   color: #fff;
   padding: 12px 24px;
   border-radius: 8px;
   font-size: 1em;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   pointer-events: none;
   z-index: 1000;
   opacity: 0;
