@@ -8,26 +8,19 @@ let pointAx = 0;
 let pointAy = 0;
 let recWidth = 0;
 let recHeight = 0;
-let firstPress = false;
-let secondPress = false;
 let drag = false;
 
-canvas.addEventListener('mousedown', event => {
+canvas.addEventListener('pointerdown', event => {
     if (!drag) {
-        firstPress = true;
-    } else if (!firstPress) {
-        secondPress = true;
-    }
-});
-
-canvas.addEventListener('mouseup', event => {
-    if (firstPress) {
-        firstPress = false;
         drag = true;
 
         pointAx = event.clientX;
         pointAy = event.clientY;
-    } else if (drag && secondPress) {
+    }
+});
+
+canvas.addEventListener('pointerup', event => {
+    if (drag) {
         if (recWidth < 0) {
             pointAx = pointAx + recWidth;
             recWidth = Math.abs(recWidth);
@@ -49,11 +42,10 @@ canvas.addEventListener('mouseup', event => {
     }
 });
 
-canvas.addEventListener('mousemove', event => {
+canvas.addEventListener('pointermove', event => {
     if (!drag) {
         return;
     }
-
 
     recWidth = event.clientX - pointAx;
     recHeight = event.clientY - pointAy;

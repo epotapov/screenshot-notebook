@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, nativeImage, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
@@ -20,7 +20,7 @@ const dateName = (prefix) => {
   const month = d.toLocaleString('en-US', { month: 'short' });
   const hour = d.getHours() % 12 || 12;
   const ampm = d.getHours() < 12 ? 'AM' : 'PM';
-  return `${prefix}-${month}-${d.getDate()}-${d.getFullYear()}-${hour}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${ampm}`;
+  return `${prefix}-${month}-${d.getDate()}-${d.getFullYear()}-${hour}.${pad(d.getMinutes())}.${pad(d.getSeconds())}${ampm}`;
 }
 
 const getScreenshots = (directory) => {
@@ -42,10 +42,19 @@ const getScreenshots = (directory) => {
 }
 
 const createWindow = () => {
+  nativeTheme.themeSource = 'dark';
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    backgroundColor: '#0f1115',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#16181d',
+      symbolColor: '#e6e8ec',
+      height: 60,
+    },
     icon: path.resolve(__dirname, '..', 'icon', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
