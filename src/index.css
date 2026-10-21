@@ -117,8 +117,7 @@ p {
 
 /* Scrollable container for tabs */
 #tab-bar {
-  padding-top: 15px;
-  padding-bottom: 15px;
+  align-self: stretch;
   display: flex;
   flex-direction: row;
   align-items: center;

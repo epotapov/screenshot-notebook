@@ -65,17 +65,16 @@ tabBar.addEventListener('wheel', (event) => {
 });
 
 wholeButton.addEventListener('click', async () => {
-    console.log("making a screenshot")
     try {
         const capturePath = await window.electronAPI.captureWindow();
-        image.src = `file://${capturePath.path}`;
+        image.src = capturePath.url;
         filesList[capturePath.name] = capturePath;
         const tab = addTab(capturePath.name);
         const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
       
         tabs.forEach((t) => {
             if (capturePath.name === t.id) {
-                image.src = filesList[t.id].path;
+                image.src = filesList[t.id].url;
             }
 
             t.style.backgroundColor = '#1f2229';
@@ -92,17 +91,16 @@ wholeButton.addEventListener('click', async () => {
 });
 
 snipButton.addEventListener('click', async () => {
-    console.log("snipping a screenshot")
     try {
         const capturePath = await window.electronAPI.captureSnip();
-        image.src = `file://${capturePath.path}`;
+        image.src = capturePath.url;
         filesList[capturePath.name] = capturePath;
         const tab = addTab(capturePath.name);
         const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
       
         tabs.forEach((t) => {
             if (capturePath.name === t.id) {
-                image.src = filesList[t.id].path;
+                image.src = filesList[t.id].url;
             }
 
             t.style.backgroundColor = '#1f2229';
@@ -181,7 +179,7 @@ const addTab = (name) => {
       
         tabs.forEach((t) => {
             if (tab.id === t.id) {
-                image.src = filesList[t.id].path;
+                image.src = filesList[t.id].url;
             }
 
             t.style.backgroundColor = '#1f2229';
@@ -212,7 +210,6 @@ copyButton.addEventListener('click', async (event) => {
     try {
         const ok = await window.electronAPI.copyScreenshot(file.path);
         if (ok) {
-            console.log('Image copied to clipboard');
             showCopyToast();
         } else {
             console.error('Failed to copy image');
@@ -236,7 +233,6 @@ document.addEventListener('keydown', async (e) => {
     try {
         const ok = await window.electronAPI.copyScreenshot(file.path);
         if (ok) {
-            console.log('Image copied to clipboard via keyboard');
             showCopyToast();
         }
     } catch (err) {
@@ -249,7 +245,6 @@ window.electronAPI.filesList((files) => {
         dict[file.name] = file;
         return dict;
     }, {});
-    console.log(filesList);
     files.forEach((file) => {
         addTab(file.name);
         fileName = '';
