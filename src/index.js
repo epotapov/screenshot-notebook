@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, nativeImage, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, ClipboardItem, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
@@ -332,12 +332,10 @@ ipcMain.handle('copy-screenshot', async (event, file) => {
       throw new Error('Refusing to copy file outside capture directory');
     }
 
-    const img = nativeImage.createFromPath(file);
-    if (img.isEmpty && img.isEmpty()) {
-      throw new Error('Failed to load image for clipboard');
-    }
-
-    clipboard.writeImage(img);
+    const png = await fs.promises.readFile(file);
+    await clipboard.write([
+      new ClipboardItem({ 'image/png': new Blob([png], { type: 'image/png' }) }),
+    ]);
     return true;
   } catch (error) {
     console.error('Error copying image to clipboard:', error);
