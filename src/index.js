@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, ClipboardItem, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { pathToFileURL } = require('url');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -13,6 +14,15 @@ let mainWindow;
 // Create screenshot directory
 let capturePath;
 
+const dateName = (prefix) => {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const hour = d.getHours() % 12 || 12;
+  const ampm = d.getHours() < 12 ? 'AM' : 'PM';
+  return `${prefix}-${month}-${d.getDate()}-${d.getFullYear()}-${hour}.${pad(d.getMinutes())}.${pad(d.getSeconds())}${ampm}`;
+}
+
 const getScreenshots = (directory) => {
   try {
     const files = fs.readdirSync(directory);
@@ -22,6 +32,7 @@ const getScreenshots = (directory) => {
       .map((file) => ({
         name: path.parse(file).name,
         path: path.join(directory, file),
+        url: pathToFileURL(path.join(directory, file)).href,
       }));
     return pngList;
   } catch (error) {
@@ -31,10 +42,19 @@ const getScreenshots = (directory) => {
 }
 
 const createWindow = () => {
+  nativeTheme.themeSource = 'dark';
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    backgroundColor: '#0f1115',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#16181d',
+      symbolColor: '#e6e8ec',
+      height: 60,
+    },
     icon: path.resolve(__dirname, '..', 'icon', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -111,11 +131,14 @@ ipcMain.handle('capture-window', async () => {
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    const screenshotPath = path.join(capturePath, `screenshot-${Date.now()}.png`);
+    const screenshotPath = path.join(capturePath, `${dateName('screenshot')}.png`);
 
     const sources = await desktopCapturer.getSources({
       types: ['screen'],
-      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+      thumbnailSize: {
+        width: Math.round(display.bounds.width * display.scaleFactor),
+        height: Math.round(display.bounds.height * display.scaleFactor),
+      },
     });
 
 
@@ -138,6 +161,7 @@ ipcMain.handle('capture-window', async () => {
     return {
       name: path.parse(screenshotPath).name,
       path: screenshotPath,
+      url: pathToFileURL(screenshotPath).href,
     };
   } catch (error) {
     console.error('Error capturing screenshot:', error);
@@ -162,55 +186,14 @@ ipcMain.handle('capture-snip', async () => {
     // Hide the window before taking a screenshot
     mainWindow.hide();
 
-    const { x, y, width, height } = display.bounds;
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
-    let overlay = new BrowserWindow({
-      x,
-      y,
-      width,
-      height,
-      frame: false,
-      transparent: true,
-      resizable: false,
-      movable: false,
-      fullscreen: false,
-      alwaysOnTop: true,
-      skipTaskbar: true,
-      hasShadow: false,
-      focusable: false,
-      show: true,
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-        contextIsolation: true,
-        nodeIntegration: false
-      }
-    });
-
-    overlay.setAlwaysOnTop(true, 'screen-saver');
-
-    overlay.loadFile(path.join(__dirname, 'overlay.html'));
-
-    // Open the DevTools.
-    // overlay.webContents.openDevTools();
-
-    const selection = await new Promise((resolve) => {
-      ipcMain.once('capture-dimension', (event, dim) => resolve(dim));
-    });
-
-    overlay.close();
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    if (!selection || selection.width <= 0 || selection.height <= 0) {
-      mainWindow.show();
-      return;
-    }
-
-    const screenshotPath = path.join(capturePath, `snip-${Date.now()}.png`);
-    
     const sources = await desktopCapturer.getSources({
       types: ['screen'],
-      thumbnailSize: { width: display.bounds.width, height: display.bounds.height },
+      thumbnailSize: {
+        width: Math.round(display.bounds.width * display.scaleFactor),
+        height: Math.round(display.bounds.height * display.scaleFactor),
+      },
     });
 
     const allDisplays = screen.getAllDisplays();
@@ -225,28 +208,86 @@ ipcMain.handle('capture-snip', async () => {
     }
 
     if (!source) {
-      mainWindow.show();
       throw new Error('Could not find screen source for the app window.');
     }
 
-    console.log(source.thumbnail.getSize());
+    const frozenImg = source.thumbnail;
 
-    const image = Buffer.from(source.thumbnail.toPNG());
-    const nativeImg = nativeImage.createFromBuffer(image);
+    const frozenPath = path.join(app.getPath('temp'), `snip-frozen-${Date.now()}.png`);
+    fs.writeFileSync(frozenPath, frozenImg.toPNG());
 
-    const snippet = nativeImg.crop(selection);
+    const { x, y, width, height } = display.bounds;
+
+    let overlay = new BrowserWindow({
+      x,
+      y,
+      width,
+      height,
+      frame: false,
+      backgroundColor: '#000000',
+      resizable: true,
+      movable: false,
+      fullscreen: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      hasShadow: false,
+      show: false,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    });
+
+    overlay.setAlwaysOnTop(true, 'screen-saver');
+    overlay.once('ready-to-show', () => {
+      overlay.show();
+      overlay.focus();
+    });
+
+    overlay.loadFile(path.join(__dirname, 'overlay.html'), {
+      query: { frozen: pathToFileURL(frozenPath).href }
+    });
+
+    // Open the DevTools.
+    // overlay.webContents.openDevTools();
+
+    const selection = await new Promise((resolve) => {
+      ipcMain.once('capture-dimension', (event, dim) => resolve(dim));
+    });
+
+    overlay.destroy();
+    fs.unlinkSync(frozenPath);
+
+    if (!selection || selection.width <= 0 || selection.height <= 0) {
+      return;
+    }
+
+    const screenshotPath = path.join(capturePath, `${dateName('snip')}.png`);
+
+    const scale = display.scaleFactor;
+    const snippet = frozenImg.crop({
+      x: Math.round(selection.x * scale),
+      y: Math.round(selection.y * scale),
+      width: Math.round(selection.width * scale),
+      height: Math.round(selection.height * scale),
+    });
 
     fs.writeFileSync(screenshotPath, snippet.toPNG());
-
-    mainWindow.show();
     
     return {
       name: path.parse(screenshotPath).name,
       path: screenshotPath,
+      url: pathToFileURL(screenshotPath).href,
     };
   } catch (error) {
     console.error('Error capturing screenshot:', error);
     throw error;
+  } finally {
+    mainWindow.setAlwaysOnTop(true);
+    mainWindow.show();
+    mainWindow.setAlwaysOnTop(false);
+    mainWindow.focus();
   }
 });
 
@@ -291,12 +332,10 @@ ipcMain.handle('copy-screenshot', async (event, file) => {
       throw new Error('Refusing to copy file outside capture directory');
     }
 
-    const img = nativeImage.createFromPath(file);
-    if (img.isEmpty && img.isEmpty()) {
-      throw new Error('Failed to load image for clipboard');
-    }
-
-    clipboard.writeImage(img);
+    const png = await fs.promises.readFile(file);
+    await clipboard.write([
+      new ClipboardItem({ 'image/png': new Blob([png], { type: 'image/png' }) }),
+    ]);
     return true;
   } catch (error) {
     console.error('Error copying image to clipboard:', error);

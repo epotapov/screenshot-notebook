@@ -23,15 +23,10 @@ body {
   margin: 0;
   background-color: var(--bg);
   color: var(--text-muted);
-}
-
-/* Rules for h1 and p */
-h1 {
   user-select: none;
 }
 
 p {
-  user-select: none;
   margin: 3px;
 }
 
@@ -47,6 +42,24 @@ p {
   background-color: var(--surface);
   border-bottom: 1px solid var(--border);
   z-index: 10;
+  box-sizing: border-box;
+  -webkit-app-region: drag;
+}
+
+/* Comes after the tabs so it overrides their no-drag areas, which
+   Chromium doesn't clip when tabs are scrolled out of view */
+#navbar::after {
+  content: '';
+  flex: 1;
+  min-width: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + clamp(16px, 8vw, 80px));
+  align-self: stretch;
+  -webkit-app-region: drag;
+  background: linear-gradient(#3a3f4b, #3a3f4b) 6px center / 2px 50% no-repeat;
+}
+
+#left-panel button,
+#tab-bar {
+  -webkit-app-region: no-drag;
 }
 
 /* Left panel for the + button */
@@ -69,7 +82,6 @@ p {
   border: none;
   font-size: 1.2em;
   cursor: pointer;
-  user-select: none;
   transition: background-color 0.15s;
 }
 
@@ -88,7 +100,6 @@ p {
   border: none;
   font-size: 1.2em;
   cursor: pointer;
-  user-select: none;
   transition: background-color 0.15s;
 }
 
@@ -107,7 +118,6 @@ p {
   border: none;
   font-size: 1.2em;
   cursor: pointer;
-  user-select: none;
   transition: background-color 0.15s;
 }
 
@@ -117,15 +127,13 @@ p {
 
 /* Scrollable container for tabs */
 #tab-bar {
-  padding-top: 15px;
-  padding-bottom: 15px;
+  align-self: stretch;
   display: flex;
   flex-direction: row;
   align-items: center;
   overflow-x: auto;
   flex-wrap: nowrap;
-  width: calc(100% - 80px);
-  user-select: none;
+  max-width: calc(100% - 80px);
 }
 
 /* Hide scrollbar in Chrome, Safari, Opera */
@@ -196,6 +204,8 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  padding: 0 20px;
 }
 
 #screenshot {
@@ -203,6 +213,7 @@ p {
   max-width: 90%;
   max-height: 90%;
   object-fit: contain;
+  -webkit-user-drag: none;
 }
 
 /* Toast notification */
