@@ -139,9 +139,8 @@ const addTab = (name) => {
 
         const result = await window.electronAPI.deleteScreenshot(file.path);
         if (result) {
-            const fileNames = Object.keys(filesList);
-            const index = fileNames.indexOf(name);
-            
+            const nextTab = tab.nextElementSibling || tab.previousElementSibling;
+
             delete filesList[name];
 
             if (tab.parentNode) {
@@ -149,19 +148,8 @@ const addTab = (name) => {
             }
 
             if (fileName === name) {
-                if (index > 0) {
-                    const prev = fileNames[index - 1];
-                    const prevTab = document.getElementById(prev);
-                    if (prevTab) {
-                        prevTab.click();
-                    }
-                }
-                else if (index == 0 && fileNames.length > 1) {
-                    const next = fileNames[1];
-                    const nextTab = document.getElementById(next);
-                    if (nextTab) {
-                        nextTab.click();
-                    }
+                if (nextTab) {
+                    nextTab.click();
                 }
                 else {
                     image.src = '';
@@ -220,23 +208,55 @@ copyButton.addEventListener('click', async (event) => {
 });
 
 document.addEventListener('keydown', async (e) => {
-    const isCopy = (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C');
-    if (!isCopy) {
+    const ctrl = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey;
+    const key = e.key.toLowerCase();
+
+    if (!ctrl) {
         return;
     }
 
-    const file = filesList[fileName];
-    if (!file) {
-        return;
-    }
+    switch (key) {
+        case 'a':
+            e.preventDefault();
+            if (!e.repeat) {
+                wholeButton.click();
+            }
+            break;
+        case 's':
+            e.preventDefault();
+            if (!e.repeat) {
+                snipButton.click();
+            }
+            break;
+        case 'c': {
+            const file = filesList[fileName];
+            if (!file) {
+                break;
+            }
 
-    try {
-        const ok = await window.electronAPI.copyScreenshot(file.path);
-        if (ok) {
-            showCopyToast();
+            try {
+                const ok = await window.electronAPI.copyScreenshot(file.path);
+                if (ok) {
+                    showCopyToast();
+                }
+            } catch (err) {
+                console.error('Error copying image via keyboard:', err);
+            }
+            break;
         }
-    } catch (err) {
-        console.error('Error copying image via keyboard:', err);
+        case 'd': {
+            e.preventDefault();
+            if (e.repeat || !filesList[fileName]) {
+                break;
+            }
+
+            const tab = document.getElementById(fileName);
+            const closeButton = tab && tab.querySelector('.close-btn');
+            if (closeButton) {
+                closeButton.click();
+            }
+            break;
+        }
     }
 });
 
