@@ -9,9 +9,13 @@
     <div id="viewer">
       <div id="welcome-message">
         <h1>Welcome to screenshot notebook</h1>
-        <p>hit the + button to make a screenshot</p>
-        <p>hit the ☐ button to make a snippet</p>
-        <p>hit the C button or Ctrl-C to copy a screenshot</p>
+        <ul class="shortcut-list">
+          <li><span>Take a screenshot</span><span class="shortcut-icon whole">+</span><kbd>Ctrl+A</kbd></li>
+          <li><span>Snip part of the screen</span><span class="shortcut-icon snip">☐</span><kbd>Ctrl+S</kbd></li>
+          <li><span>Copy the screenshot</span><span class="shortcut-icon copy">C</span><kbd>Ctrl+C</kbd></li>
+          <li><span>Delete the screenshot</span><kbd>Ctrl+D</kbd></li>
+          <li><span>Switch between screenshots</span><kbd>← / →</kbd></li>
+        </ul>
       </div>
       <img id="screenshot">
     </div>

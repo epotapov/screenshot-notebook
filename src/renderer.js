@@ -65,6 +65,7 @@ tabBar.addEventListener('wheel', (event) => {
 });
 
 wholeButton.addEventListener('click', async () => {
+    wholeButton.blur();
     try {
         const capturePath = await window.electronAPI.captureWindow();
         image.src = capturePath.url;
@@ -91,6 +92,7 @@ wholeButton.addEventListener('click', async () => {
 });
 
 snipButton.addEventListener('click', async () => {
+    snipButton.blur();
     try {
         const capturePath = await window.electronAPI.captureSnip();
         image.src = capturePath.url;
@@ -118,6 +120,12 @@ snipButton.addEventListener('click', async () => {
 
 
 const addTab = (name) => {
+    const existingTab = document.getElementById(name);
+    if (existingTab) {
+        fileName = name;
+        return existingTab;
+    }
+
     const tab = document.createElement('div');
     tab.className = 'screenshot-tab';
 
@@ -132,6 +140,7 @@ const addTab = (name) => {
 
     closeButton.addEventListener('click', async (event) => {
         event.stopPropagation();
+        closeButton.blur();
         const file = filesList[name];
         if (!file) {
             return;
@@ -163,15 +172,18 @@ const addTab = (name) => {
     });
 
     tab.addEventListener('click', () => {
-        const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
-      
-        tabs.forEach((t) => {
-            if (tab.id === t.id) {
-                image.src = filesList[t.id].url;
-            }
+        const file = filesList[name];
+        if (!file) {
+            return;
+        }
 
+        const tabs = document.querySelectorAll('#tab-bar .screenshot-tab');
+
+        tabs.forEach((t) => {
             t.style.backgroundColor = '#1f2229';
         });
+
+        image.src = file.url;
       
         tab.style.backgroundColor = selectedTab;
 
@@ -190,6 +202,7 @@ const addTab = (name) => {
 
 copyButton.addEventListener('click', async (event) => {
     event.preventDefault();
+    copyButton.blur();
     const file = filesList[fileName];
     if (!file) {
         return;
@@ -207,9 +220,43 @@ copyButton.addEventListener('click', async (event) => {
     }
 });
 
+image.addEventListener('dragstart', (e) => {
+    e.preventDefault();
+    const file = filesList[fileName];
+    if (file) {
+        window.electronAPI.startDrag(file.path);
+    }
+});
+
 document.addEventListener('keydown', async (e) => {
     const ctrl = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey;
     const key = e.key.toLowerCase();
+    const noModifiers = !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey;
+
+    if (noModifiers && (key === 'arrowleft' || key === 'arrowright')) {
+        e.preventDefault();
+        const tabs = Array.from(document.querySelectorAll('#tab-bar .screenshot-tab'));
+        const currentIndex = tabs.findIndex(t => t.id === fileName);
+
+        let target;
+        if (currentIndex === -1) {
+            if (key === 'arrowleft') {
+                target = tabs[tabs.length - 1];
+            } else {
+                target = tabs[0];
+            }
+        } else if (key === 'arrowleft') {
+            target = tabs[currentIndex - 1];
+        } else {
+            target = tabs[currentIndex + 1];
+        }
+
+        if (target) {
+            target.click();
+            target.scrollIntoView({ inline: 'nearest' });
+        }
+        return;
+    }
 
     if (!ctrl) {
         return;
@@ -244,6 +291,10 @@ document.addEventListener('keydown', async (e) => {
             }
             break;
         }
+        case 'x':
+            e.preventDefault();
+            window.close();
+            break;
         case 'd': {
             e.preventDefault();
             if (e.repeat || !filesList[fileName]) {

@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     filesList: (callback) => ipcRenderer.on('files-list', (event, files) => callback(files)),
     deleteScreenshot: (file) => ipcRenderer.invoke('delete-screenshot', file),
     copyScreenshot: (file) => ipcRenderer.invoke('copy-screenshot', file),
+    startDrag: (file) => ipcRenderer.send('start-drag', file),
 });
 

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, ClipboardItem, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, screen, clipboard, ClipboardItem, nativeTheme, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
@@ -340,5 +340,32 @@ ipcMain.handle('copy-screenshot', async (event, file) => {
   } catch (error) {
     console.error('Error copying image to clipboard:', error);
     return false;
+  }
+});
+
+
+ipcMain.on('start-drag', (event, file) => {
+  try {
+    if (!file) {
+      return;
+    }
+
+    // Ensure the file is inside our capture directory to avoid dragging arbitrary files
+    const normalizedCapture = path.normalize(capturePath + path.sep);
+    const normalizedFile = path.normalize(file);
+
+    if (!normalizedFile.startsWith(normalizedCapture) || !fs.existsSync(normalizedFile)) {
+      return;
+    }
+
+    // Small preview of the screenshot that follows the cursor
+    const icon = nativeImage.createFromPath(normalizedFile);
+    if (icon.isEmpty()) {
+      return;
+    }
+
+    event.sender.startDrag({ file: normalizedFile, icon: icon.resize({ width: 128 }) });
+  } catch (error) {
+    console.error('Error dragging image to folder:', error);
   }
 });
