@@ -52,7 +52,6 @@ canvas.addEventListener('pointermove', event => {
 
     ctx.strokeStyle = '#adffefff';
     ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
