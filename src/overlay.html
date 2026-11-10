@@ -6,16 +6,26 @@
         width: 100vw;
         height: 100vh;
         margin: 0;
-        background: rgba(0, 0, 0, 0.35);
         cursor: crosshair;
+      }
+      html {
+        background-size: 100% 100%;
+      }
+      body {
+        background: rgba(0, 0, 0, 0.35);
       }
       canvas {
         display: block;
+        touch-action: none;
       }
     </style>
   </head>
   <body>
     <canvas id="canvas"></canvas>
+    <script>
+      const frozen = new URLSearchParams(location.search).get('frozen');
+      document.documentElement.style.backgroundImage = `url("${frozen}")`;
+    </script>
     <script defer src="draggable.js"></script>
   </body>
 </html>
