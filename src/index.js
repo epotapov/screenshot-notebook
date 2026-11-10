@@ -33,7 +33,9 @@ const getScreenshots = (directory) => {
         name: path.parse(file).name,
         path: path.join(directory, file),
         url: pathToFileURL(path.join(directory, file)).href,
-      }));
+        timestamp: fs.statSync(path.join(directory, file)).mtimeMs,
+      }))
+      .sort((a, b) => a.timestamp - b.timestamp);
     return pngList;
   } catch (error) {
     console.error('Error reading directory:', error);
